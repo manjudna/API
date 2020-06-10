@@ -2,8 +2,10 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Polly;
 using RestSharp;
 using System;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -24,24 +26,37 @@ namespace OpenWeatherMapApi.Services
         {
 
             string cacheKey = city.ToLower();
-           
+
             if (!_memoryCache.TryGetValue(cacheKey, out WeatherData weatherForecast))
             {
-                string apiURL = AppSettings.OpenWeatherApiURL.Replace("{city}",city);
-                var client = new RestClient(apiURL);
-                var request = new RestRequest(Method.GET);
-                IRestResponse response = await client.ExecuteAsync(request);
+                var noofret = 0;
+                var policy = Policy.
+                    Handle<Exception>().
+                    OrResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+                    .RetryAsync(3, (ex, retryCount) =>
+                    {
+                        noofret = retryCount;
+                    });
 
-                if (response.IsSuccessful)
+                string apiURL = AppSettings.OpenWeatherApiURL.Replace("{city}", city);
+                //var client = new RestClient(apiURL);
+                //var request = new RestRequest(Method.GET);
+                //IRestResponse response =  await client.ExecuteAsync(request);
+
+
+                HttpClient httpClient = new HttpClient();
+                HttpResponseMessage response = await policy.ExecuteAsync(
+                    () => httpClient.GetAsync(apiURL));
+                if (response.IsSuccessStatusCode)
                 {
-                    // Deserialize the string content into JToken object
-                    var content = JsonConvert.DeserializeObject<JToken>(response.Content);
-                    var weatherData = content.ToObject<WeatherResponse>();
+                    var resultsfromapi = response.Content.ReadAsStringAsync();
+                    var content = JsonConvert.DeserializeObject<JToken>(resultsfromapi.Result);
+                    var weatherData1 = content.ToObject<WeatherResponse>();
                     if (weatherForecast == null)
                         weatherForecast = new WeatherData();
-                 
-                    weatherForecast = WeatherMapper.MapWeatherObjects(weatherData, weatherForecast);
-                     //add redis cache here ideally
+
+                    weatherForecast = WeatherMapper.MapWeatherObjects(weatherData1, weatherForecast);
+                    //add redis cache here ideally
 
                     //TODO::to be moved to Seperate class to make use of memory related operations 
                     var cacheExpiryOption = new MemoryCacheEntryOptions
@@ -53,6 +68,29 @@ namespace OpenWeatherMapApi.Services
                     _memoryCache.Set(cacheKey, weatherForecast, cacheExpiryOption);
 
                 }
+
+
+                //if (response.IsSuccessful)
+                //{
+                //    // Deserialize the string content into JToken object
+                //    var content = JsonConvert.DeserializeObject<JToken>(response.Content);
+                //    var weatherData = content.ToObject<WeatherResponse>();
+                //    if (weatherForecast == null)
+                //        weatherForecast = new WeatherData();
+
+                //    weatherForecast = WeatherMapper.MapWeatherObjects(weatherData, weatherForecast);
+                //     //add redis cache here ideally
+
+                //    //TODO::to be moved to Seperate class to make use of memory related operations 
+                //    var cacheExpiryOption = new MemoryCacheEntryOptions
+                //    {
+                //        AbsoluteExpiration = DateTime.Now.AddHours(6),
+                //        Priority = CacheItemPriority.Normal,
+                //        SlidingExpiration = TimeSpan.FromMinutes(5)
+                //    };
+                //    _memoryCache.Set(cacheKey, weatherForecast, cacheExpiryOption);
+
+                //}
 
             }
 
