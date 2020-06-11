@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenWeatherMapApi", "OpenWeatherMapApi.csproj", "{D15F677E-74F3-4523-8162-98C74BE1C2AE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XUnitTestProject1", "..\..\XUnitTestProject1\XUnitTestProject1.csproj", "{860B5240-A5AB-43FB-8B30-BD7525A2C40A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D15F677E-74F3-4523-8162-98C74BE1C2AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D15F677E-74F3-4523-8162-98C74BE1C2AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D15F677E-74F3-4523-8162-98C74BE1C2AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{860B5240-A5AB-43FB-8B30-BD7525A2C40A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{860B5240-A5AB-43FB-8B30-BD7525A2C40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{860B5240-A5AB-43FB-8B30-BD7525A2C40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{860B5240-A5AB-43FB-8B30-BD7525A2C40A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
